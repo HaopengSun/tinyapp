@@ -59,6 +59,12 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+app.post("/urls/:shortURL/delete", (req, res) => {
+  console.log(req.params);
+  delete urlDatabase[req.params.shortURL];
+  res.redirect("/urls");
+});
+
 // a variable that is created in one request is not accessible in another
 app.get("/set", (req, res) => {
  const a = 1;
