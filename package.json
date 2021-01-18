@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/HaopengSun/tinyapp/issues"
   },
-  "homepage": "https://github.com/HaopengSun/tinyapp#readme"
+  "homepage": "https://github.com/HaopengSun/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
