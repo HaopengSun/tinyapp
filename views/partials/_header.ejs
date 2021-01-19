@@ -19,15 +19,17 @@
           </li>
         </ul>
 
-        <% if (!username) { %>
-        <form class="form-inline my-2 my-lg-0" action="/login" method="POST">
-          <input class="form-control mr-sm-2" name="username" type="text" placeholder="User name">
+        <% if (!user) { %>
+        <form class="form-inline my-2 my-lg-0" action="/login" method="GET">
           <button class="btn btn-outline-dark" type="submit">Log in</button>
+        </form>
+        <form class="form-inline my-2 my-lg-0" action="/register" method="GET">
+          <button class="btn btn-outline-dark" style="margin-left: 10px;" type="submit">Register</button>
         </form>
         <% } else { %>
           <form class="form-inline my-2 my-lg-0" method="POST" action="/logout">
             <!-- '=' means we want to display sth -->
-            <a class="nav-item nav-link disabled" href="#">Logged in as <%= username %></a>
+            <a class="nav-item nav-link disabled" href="#">Logged in as <%= user.email %></a>
             <button class="btn btn-outline-dark" type="submit">Logout</button>
           </form>
         <% } %>
