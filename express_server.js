@@ -65,6 +65,12 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect("/urls");
 });
 
+app.post("/urls/:shortURL", (req, res) => {
+  const key = req.params.shortURL;
+  urlDatabase[key] = req.body.longURL;
+  res.redirect(`/urls`);
+});
+
 // a variable that is created in one request is not accessible in another
 app.get("/set", (req, res) => {
  const a = 1;

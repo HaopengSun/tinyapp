@@ -18,15 +18,19 @@
         <tr>
           <th scope="col">Short URL</th>
           <th scope="col">Long URL</th>
+          <th scope="col">Edit</th>
           <th scope="col">Delete</th>
         </tr>
       </thead>
       <tbody>
         <% for(let url in urls) { %>
           <tr>
-            <form method="POST" action="/urls/<%= url %>/delete">
+            <form method="GET" action="/urls/<%= url %>">
               <td><%= url %></td>
               <td><%= urls[url] %></td>
+              <td><button type="submit" class="btn btn-outline-primary">Edit</button></td>
+            </form>
+            <form method="POST" action="/urls/<%= url %>/delete">
               <td><button type="submit" class="btn btn-outline-danger">Delete</button></td>
             </form>
           </tr>
