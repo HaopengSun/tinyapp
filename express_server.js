@@ -2,6 +2,9 @@ const express = require("express");
 const app = express();
 const PORT = 8080;
 
+const morgan = require('morgan');
+app.use(morgan('dev'));
+
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
@@ -58,11 +61,15 @@ function generateRandomString() {
   return  Math.random().toString(36).substring(2,8);
 }
 
+// shortURL is the key of the requested object { shortURL:value }
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
 });
 
+// show individual URL
+// templateVars object has just one URL based on request
+// we can have multiple /:agrs
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
     shortURL: req.params.shortURL,
@@ -72,8 +79,8 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+// delete
 app.post("/urls/:shortURL/delete", (req, res) => {
-  console.log(req.params);
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls");
 });
