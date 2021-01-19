@@ -71,6 +71,13 @@ app.post("/urls/:shortURL", (req, res) => {
   res.redirect(`/urls`);
 });
 
+// set cookie
+app.post("/login", (req, res) => {
+  const name = req.body.username;
+  res.cookie(name, 'cookie');
+  res.redirect(`/urls`);
+});
+
 // a variable that is created in one request is not accessible in another
 app.get("/set", (req, res) => {
  const a = 1;
