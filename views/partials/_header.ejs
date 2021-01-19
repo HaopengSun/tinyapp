@@ -6,23 +6,32 @@
     </button>
   
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
-        <a class="nav-item nav-link" href="/urls">My URLs</a>
-        <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-      
+      <!-- <div class="navbar-nav"> -->
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a class="nav-item nav-link" href="/urls">My URLs</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-item nav-link" href="/urls.json">JSON</a>
+          </li>
+        </ul>
 
-      <% if (!username) { %>
-      <form class="form-inline my-2 my-lg-0" action="/login" method="POST">
-        <input class="form-control mr-sm-2" name="username" type="text" placeholder="User name" aria-label="Search">
-        <button class="btn btn-outline-dark" type="submit">Log in</button>
-      </form>
-      <% } else { %>
-        <form class="form-inline my-2 my-lg-0" method="POST" action="/logout">
-          <a class="nav-item nav-link disabled" href="#">Logged in as <%= username %></a>
-          <button class="btn btn-outline-dark" type="submit">Logout</button>
+        <% if (!username) { %>
+        <form class="form-inline my-2 my-lg-0" action="/login" method="POST">
+          <input class="form-control mr-sm-2" name="username" type="text" placeholder="User name">
+          <button class="btn btn-outline-dark" type="submit">Log in</button>
         </form>
-      <% } %>
-    </div>
+        <% } else { %>
+          <form class="form-inline my-2 my-lg-0" method="POST" action="/logout">
+            <!-- '=' means we want to display sth -->
+            <a class="nav-item nav-link disabled" href="#">Logged in as <%= username %></a>
+            <button class="btn btn-outline-dark" type="submit">Logout</button>
+          </form>
+        <% } %>
+      <!-- </div> -->
     </div>
   </nav>
 </header>

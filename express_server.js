@@ -29,6 +29,8 @@ app.get("/urls.json", (req, res) => {
 
 app.get("/hello", (req, res) => {
   const templateVars = { greeting: 'Hello World!' };
+  // render takes two args, first is file name and second is arguments that
+  // you want to be accessable inside the view
   res.render("hello_world", templateVars);
 });
 
@@ -104,6 +106,7 @@ app.get("/fetch", (req, res) => {
  res.send(`a = ${a}`);
 });
 
+// server starts listening
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
