@@ -2,9 +2,11 @@ const express = require("express");
 const app = express();
 const PORT = 8080;
 
+// recorde every thing happedn in server in console.log
 const morgan = require('morgan');
 app.use(morgan('dev'));
 
+// get req.body from the body of HTML file
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
@@ -45,12 +47,19 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+// post a new url
 app.post("/urls", (req, res) => {
+  // random string as the key of input URL
   const key = generateRandomString();
+  // bodyParse {longURL: "what user types in" } <input name="longURL">
+  // id is mainly for css styling
   urlDatabase[key] = req.body.longURL;
-  res.redirect(`/urls/${key}`);
+  // res.redirect(`/urls/${key}`);
+  res.redirect(`/urls`);
 });
 
+// routes order masters and "/urls/new" should be before "/urls/:shortURL"
+// get a form from server to fill out the new url
 app.get("/urls/new", (req, res) => {
   const templateVars = {};
   templateVars.username = req.cookies.username || '';
@@ -117,3 +126,5 @@ app.get("/fetch", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+// PUT to update the URL
