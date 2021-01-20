@@ -13,13 +13,13 @@
   <%- include('partials/_header') %>
   <main style="margin: 1em;">
     <h3>My URLs</h3>
-    <% if (!user.id) {%>
+    <% if (!user) {%>
     <p>* Please log in to check shortURL or log up to create your own shortURL</p>
     <% } %>
     <table class="table">
       <thead>
         <tr>
-          <% if (user.id) {%>
+          <% if (user) {%>
           <th scope="col">Short URL</th>
           <% } %>
           <th scope="col">Long URL</th>
@@ -33,15 +33,15 @@
       <tbody>
         <% for(let url in urls) { %>
           <tr>
-            <% if (user.id === urls[url]["userID"]) { %>
+            <% if (user === urls[url]["userID"]) { %>
             <td><%= url %></td>
-            <% } else if (user.id) { %>
+            <% } else if (user) { %>
             <td><p>Unkown</p></td>
             <% } %>
             <td><%= urls[url]["longURL"] %></td>
             <td><%= urls[url]["userID"] %></td>
             
-            <% if (user.id === urls[url]["userID"]) { %>
+            <% if (user === urls[url]["userID"]) { %>
               <form method="GET" action="/urls/<%= url %>">
                 <td><button type="submit" class="btn btn-outline-primary">Edit/Show</button></td>
               </form>

@@ -12,12 +12,12 @@
       <div class="card-header"></div>
       <div class="card-body">
         <h5 class="card-title">TinyURL for: <%= longURL %></h5>
-        <% if (user.id === currentUser) {%>
+        <% if (user === currentUser) {%>
         <p class="card-text">Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a></p>
         <% } %>
       </div>
       
-      <% if (user.id === currentUser) {%>
+      <% if (user === currentUser) {%>
       <h3>Edit</h3>
       <form action="/urls/<%= shortURL %>" method="POST">
         <div class="form-group mb-2">

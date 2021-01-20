@@ -1,5 +1,9 @@
 const express = require("express");
 const app = express();
+
+// public file provide css or boostrap
+// app.use(express.static("public"))
+
 const PORT = 8080;
 
 // recorde every thing happedn in server in console.log
@@ -8,9 +12,13 @@ app.use(morgan('dev'));
 
 // get req.body from the body of HTML file
 const bodyParser = require("body-parser");
+
+// form request being filled out is sent to server and parsed as object
 app.use(bodyParser.urlencoded({extended: true}));
 
 const cookieParser = require('cookie-parser');
+
+// take in a cookie string and parse it to object
 app.use(cookieParser());
 
 var cookieSession = require('cookie-session')
@@ -23,7 +31,11 @@ app.use(cookieSession({
 // hashing password
 const bcrypt = require('bcrypt');
 
+// ejs syntax <%= var %>
 app.set("view engine", "ejs");
+
+// import helpers
+// const { emailChecker, passwordChecker } = require('./helper');
 
 const urlDatabase = {};
 
@@ -52,7 +64,8 @@ app.get("/urls", (req, res) => {
   const templateVars = { 
     urls: urlDatabase
   };
-  templateVars.user = users[req.session.user_id] || '';
+  templateVars.user = req.session.user || '';
+  console.log(req.session);
   res.render("urls_index", templateVars);
 });
 
@@ -62,7 +75,7 @@ app.post("/urls", (req, res) => {
   const key = generateRandomString();
   // bodyParse {longURL: "what user types in" } <input name="longURL">
   // id is mainly for css styling
-  urlDatabase[key] = { longURL: req.body.longURL, userID: req.session.user_id};
+  urlDatabase[key] = { longURL: req.body.longURL, userID: req.session.user};
   res.redirect(`/urls`);
 });
 
@@ -70,7 +83,7 @@ app.post("/urls", (req, res) => {
 // get a form from server to fill out the new url
 app.get("/urls/new", (req, res) => {
   const templateVars = {};
-  templateVars.user = users[req.session.user_id] || '';
+  templateVars.user = req.session.user || '';
   if (templateVars.user) {
     res.render("urls_new", templateVars);
   } else {
@@ -97,7 +110,7 @@ app.get("/urls/:shortURL", (req, res) => {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL]["longURL"]
   };
-  templateVars.user = users[req.session.user_id] || '';
+  templateVars.user = users[req.session.user] || '';
   templateVars.currentUser = urlDatabase[req.params.shortURL]["userID"];
   res.render("urls_show", templateVars);
 });
@@ -110,30 +123,35 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 app.post("/urls/:shortURL", (req, res) => {
   const key = req.params.shortURL;
-  urlDatabase[key] = { longURL: req.body.longURL, userID: req.session.user_id};
+  urlDatabase[key] = { longURL: req.body.longURL, userID: req.session.user};
   res.redirect(`/urls`);
 });
 
 app.get("/login", (req, res) => {
   const templateVars = {};
-  templateVars.user = users[req.session.user_id] || '';
+  templateVars.user = req.session.user || '';
   res.render('login', templateVars);
 });
 
-// set cookie
 app.post("/login", (req, res) => {
+  // due to bodyPaser, we can be access to the body object
   const email = req.body.email;
   const password = req.body.password;
-  if (!emailChecker(email) && passwordChecker(password)){
-    const templateVars = {};
-    const id = passwordChecker(password);
-    templateVars.user = users[req.session.user_id] || '';
-    req.session.user_id = id;
-    res.redirect(`/urls`);
+  if (users[email]) {
+    if (bcrypt.compareSync(password, users[email]["password"])){
+      const templateVars = {};
+      templateVars.user = email;
+
+      req.session.user = email;
+      res.redirect(`/urls`);
+    } else {
+      res.status(403);
+      res.send('incorrect password!');
+    }
   } else {
     res.status(403);
-    res.send('incorrect email/password!');
-  }
+    res.send('incorrect email!');
+  }  
 });
 
 app.post('/logout', (req, res) => {
@@ -143,53 +161,34 @@ app.post('/logout', (req, res) => {
 
 app.get('/register', (req, res) => {
   const templateVars = {};
-  templateVars.user = users[req.session.user_id] || '';
+  templateVars.user = req.session.user || '';
   res.render("registration", templateVars);
 });
 
 app.post('/register', (req, res) => {
+  const passwordInput = req.body.password;
+  const emailInput = req.body.email;
 
-  if (req.body.password.length === 0 || req.body.email.length === 0) {
+  if (passwordInput.length === 0 || emailInput.length === 0) {
     res.status(400);
+    res.send('input email and password');
   }
 
-  if (!emailChecker(req.body.email)) {
+  if (users[emailInput]) {
     res.status(400);
     res.send('invalid email');
   }
 
   const id = generateRandomString();
-  const email = req.body.email;
-  const password = req.body.password;
-  const hashedPassword = bcrypt.hashSync(password, 10);
-  // console.log(email, password);
-  users[id] = {id, email, hashedPassword};
+  const hashedPassword = bcrypt.hashSync(passwordInput, 10);
+  users[emailInput] = {id, email: emailInput, password: hashedPassword};
 
   const templateVars = {};
-  templateVars.user = users[req.session.user_id] || '';
+  templateVars.user = emailInput;
 
-  req.session.user_id = id;
+  req.session.user = emailInput;
   res.redirect("/urls");
 });
-
-const emailChecker = (email) => {
-  for (const user in users){
-    console.log(users[user]["email"]);
-    if (users[user]["email"] === email) {
-      return false;
-    }
-  }
-  return true;
-}
-
-const passwordChecker = (password) => {
-  for (const user in users){
-    if (bcrypt.compareSync(password, users[user]["hashedPassword"])) {
-      return user;
-    }
-  }
-  return false;
-}
 
 // a variable that is created in one request is not accessible in another
 app.get("/set", (req, res) => {
@@ -205,5 +204,3 @@ app.get("/fetch", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-
-// PUT to update the URL

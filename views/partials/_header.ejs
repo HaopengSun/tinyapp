@@ -29,7 +29,7 @@
         <% } else { %>
           <form class="form-inline my-2 my-lg-0" method="POST" action="/logout">
             <!-- '=' means we want to display sth -->
-            <a class="nav-item nav-link disabled" href="#">Logged in as <%= user.email %></a>
+            <a class="nav-item nav-link disabled" href="#">Logged in as <%= user %></a>
             <button class="btn btn-outline-dark" type="submit">Logout</button>
           </form>
         <% } %>
