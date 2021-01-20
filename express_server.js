@@ -16,8 +16,8 @@ app.use(cookieParser());
 app.set("view engine", "ejs");
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "userRandomID" },
+  i3BoGr: { longURL: "https://www.google.ca", userID: "user2RandomID" }
 };
 
 const users = { 
@@ -66,7 +66,8 @@ app.post("/urls", (req, res) => {
   const key = generateRandomString();
   // bodyParse {longURL: "what user types in" } <input name="longURL">
   // id is mainly for css styling
-  urlDatabase[key] = req.body.longURL;
+  urlDatabase[key] = { longURL: req.body.longURL, userID: req.cookies.user_id};
+  console.log(urlDatabase);
   // res.redirect(`/urls/${key}`);
   res.redirect(`/urls`);
 });
@@ -76,7 +77,12 @@ app.post("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
   const templateVars = {};
   templateVars.user = users[req.cookies.user_id] || '';
-  res.render("urls_new", templateVars);
+  if (templateVars.user) {
+    res.render("urls_new", templateVars);
+  } else {
+    res.redirect("/urls")
+  }
+  
 });
 
 function generateRandomString() {
@@ -85,7 +91,7 @@ function generateRandomString() {
 
 // shortURL is the key of the requested object { shortURL:value }
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
+  const longURL = urlDatabase[req.params.shortURL]["longURL"];
   res.redirect(longURL);
 });
 
@@ -95,9 +101,11 @@ app.get("/u/:shortURL", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
     shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL]
+    longURL: urlDatabase[req.params.shortURL]["longURL"]
   };
   templateVars.user = users[req.cookies.user_id] || '';
+  templateVars.currentUser = urlDatabase[req.params.shortURL]["userID"];
+  console.log(templateVars)
   res.render("urls_show", templateVars);
 });
 
@@ -109,7 +117,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 app.post("/urls/:shortURL", (req, res) => {
   const key = req.params.shortURL;
-  urlDatabase[key] = req.body.longURL;
+  urlDatabase[key] = { longURL: req.body.longURL, userID: req.cookies.user_id};
   res.redirect(`/urls`);
 });
 
@@ -130,6 +138,7 @@ app.post("/login", (req, res) => {
     res.cookie('user_id', id);
     res.redirect(`/urls`);
   } else {
+    res.status(403);
     res.send('incorrect email/password!');
   }
 });
