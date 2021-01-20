@@ -35,7 +35,7 @@ const bcrypt = require('bcrypt');
 app.set("view engine", "ejs");
 
 // import helpers
-// const { emailChecker, passwordChecker } = require('./helper');
+const { getUserByEmail } = require('./helper');
 
 const urlDatabase = {};
 
@@ -137,8 +137,9 @@ app.post("/login", (req, res) => {
   // due to bodyPaser, we can be access to the body object
   const email = req.body.email;
   const password = req.body.password;
-  if (users[email]) {
-    if (bcrypt.compareSync(password, users[email]["password"])){
+  if (getUserByEmail(email, users)) {
+    const user = getUserByEmail(email, users);
+    if (bcrypt.compareSync(password, users[user]["password"])){
       const templateVars = {};
       templateVars.user = email;
 
@@ -174,14 +175,14 @@ app.post('/register', (req, res) => {
     res.send('input email and password');
   }
 
-  if (users[emailInput]) {
+  if (getUserByEmail(emailInput, users)) {
     res.status(400);
     res.send('invalid email');
   }
 
   const id = generateRandomString();
   const hashedPassword = bcrypt.hashSync(passwordInput, 10);
-  users[emailInput] = {id, email: emailInput, password: hashedPassword};
+  users[id] = {id, email: emailInput, password: hashedPassword};
 
   const templateVars = {};
   templateVars.user = emailInput;
