@@ -110,7 +110,7 @@ app.get("/urls/:shortURL", (req, res) => {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL]["longURL"]
   };
-  templateVars.user = users[req.session.user] || '';
+  templateVars.user = req.session.user || '';
   templateVars.currentUser = urlDatabase[req.params.shortURL]["userID"];
   res.render("urls_show", templateVars);
 });
