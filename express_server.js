@@ -15,8 +15,11 @@ const bodyParser = require("body-parser");
 
 // form request being filled out is sent to server and parsed as object
 app.use(bodyParser.urlencoded({extended: true}));
-
 const cookieParser = require('cookie-parser');
+
+// override with POST having ?_method=DELETE
+var methodOverride = require('method-override');
+app.use(methodOverride('_method'));
 
 // take in a cookie string and parse it to object
 app.use(cookieParser());
@@ -83,13 +86,12 @@ app.post("/urls", (req, res) => {
 // get a form from server to fill out the new url
 app.get("/urls/new", (req, res) => {
   const templateVars = {};
-  templateVars.user = req.session.user || '';
+  templateVars.user = req.session.user;
   if (templateVars.user) {
     res.render("urls_new", templateVars);
   } else {
     res.redirect("/urls")
   }
-  
 });
 
 function generateRandomString() {
@@ -110,7 +112,7 @@ app.get("/urls/:shortURL", (req, res) => {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL]["longURL"]
   };
-  templateVars.user = req.session.user || '';
+  templateVars.user = req.session.user;
   templateVars.currentUser = urlDatabase[req.params.shortURL]["userID"];
   res.render("urls_show", templateVars);
 });
@@ -190,6 +192,23 @@ app.post('/register', (req, res) => {
   req.session.user = emailInput;
   res.redirect("/urls");
 });
+
+
+// Modify the forms that should be PUT or DELETE.
+app.delete("/urls/:shortURL", (req, res) => {
+  delete urlDatabase[req.params.shortURL];
+  res.redirect("/urls");
+});
+
+app.put("/urls/:shortURL", (req, res) => {
+  console.log('put')
+  console.log(req);
+  const key = req.params.shortURL;
+  urlDatabase[key] = { longURL: req.body.longURL, userID: req.session.user};
+  res.redirect(`/urls`);
+});
+
+
 
 // a variable that is created in one request is not accessible in another
 app.get("/set", (req, res) => {
