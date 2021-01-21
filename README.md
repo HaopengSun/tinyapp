@@ -6,14 +6,22 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 home page
 !["home"](https://github.com/HaopengSun/tinyapp/blob/master/docs/home.png)
+registration
 !["registration"](https://github.com/HaopengSun/tinyapp/blob/master/docs/registration.png)
+create a new url
 !["create url"](https://github.com/HaopengSun/tinyapp/blob/master/docs/create-url.png)
+after creating url, url is shown for the user who created it
 !["url created"](https://github.com/HaopengSun/tinyapp/blob/master/docs/url-crested.png)
+edit url
 !["edit url"](https://github.com/HaopengSun/tinyapp/blob/master/docs/edit-url.png)
+url is shown when user does not log in
 !["show url"](https://github.com/HaopengSun/tinyapp/blob/master/docs/show-url.png)
+url is shown when another user logs in
 !["show url"](https://github.com/HaopengSun/tinyapp/blob/master/docs/url-show-other-user.png)
+url's detail is shown when another user logs in
 !["show url"](https://github.com/HaopengSun/tinyapp/blob/master/docs/show-url-another-user.png)
-!["create another url"](https://github.com/HaopengSun/tinyapp/blob/master/docs/create-another-url.png)
+another user creates an url
+!["create url"](https://github.com/HaopengSun/tinyapp/blob/master/docs/create-another-url.png)
 
 ## Dependencies
 
