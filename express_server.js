@@ -115,8 +115,10 @@ app.get("/u/:shortURL", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const urlData = urlDatabase[req.params.shortURL];
   const currentDate = new Date();
-  const visitInfo = req.session.user + '(' + currentDate.toJSON().slice(0, 10) + ')';
-  urlData.visitedUser.push(visitInfo);
+  if (req.session.user) {
+    const visitInfo = req.session.user + '(' + currentDate.toJSON().slice(0, 10) + ')';
+    urlData.visitedUser.push(visitInfo);
+  }
 
   const templateVars = {
     shortURL: req.params.shortURL,
