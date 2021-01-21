@@ -40,6 +40,17 @@ app.set("view engine", "ejs");
 // import helpers
 const { getUserByEmail } = require('./helper');
 
+// middleware--currentUser
+const currentUser = (req, res, next) => {
+  req.currentUser = req.session.user;
+  // calling the next middleware in the chain.
+  next();
+};
+
+// activate the middleware
+// on each request, it's going to execute that function
+app.use(currentUser);
+
 const urlDatabase = {};
 
 const users = {}
@@ -67,7 +78,7 @@ app.get("/urls", (req, res) => {
   const templateVars = { 
     urls: urlDatabase
   };
-  templateVars.user = req.session.user || '';
+  templateVars.currentUser = req.currentUser || '';
   console.log(req.session);
   res.render("urls_index", templateVars);
 });
@@ -91,11 +102,11 @@ app.post("/urls", (req, res) => {
 // get a form from server to fill out the new url
 app.get("/urls/new", (req, res) => {
   const templateVars = {};
-  templateVars.user = req.session.user;
-  if (templateVars.user) {
+  templateVars.currentUser = req.currentUser;
+  if (templateVars.currentUser) {
     res.render("urls_new", templateVars);
   } else {
-    res.redirect("/urls")
+    res.redirect("/urls");
   }
 });
 
@@ -115,8 +126,8 @@ app.get("/u/:shortURL", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const urlData = urlDatabase[req.params.shortURL];
   const currentDate = new Date();
-  if (req.session.user) {
-    const visitInfo = req.session.user + '(' + currentDate.toJSON().slice(0, 10) + ')';
+  if (req.currentUser) {
+    const visitInfo = req.currentUser + '(' + currentDate.toJSON().slice(0, 10) + ')';
     urlData.visitedUser.push(visitInfo);
   }
 
@@ -125,8 +136,9 @@ app.get("/urls/:shortURL", (req, res) => {
     longURL: urlData.longURL,
     visited: urlData.visited++,
     visitedUser: urlData.visitedUser,
-    user: req.session.user,
-    currentUser: urlData.userID,
+    // "currentUser: req.session.user," is transfered to middleware currentUser
+    currentUser: req.currentUser,
+    user: urlData.userID,
   };
 
   res.render("urls_show", templateVars);
@@ -150,8 +162,7 @@ app.post("/urls/:shortURL", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  const templateVars = {};
-  templateVars.user = req.session.user || '';
+  const templateVars = { currentUser: null };
   res.render('login', templateVars);
 });
 
@@ -184,7 +195,7 @@ app.post('/logout', (req, res) => {
 
 app.get('/register', (req, res) => {
   const templateVars = {};
-  templateVars.user = req.session.user || '';
+  templateVars.currentUser = req.currentUser || null;
   res.render("registration", templateVars);
 });
 

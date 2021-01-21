@@ -19,7 +19,7 @@
           </li>
         </ul>
 
-        <% if (!user) { %>
+        <% if (!currentUser) { %>
         <form class="form-inline my-2 my-lg-0" action="/login" method="GET">
           <button class="btn btn-outline-dark" type="submit">Log in</button>
         </form>
@@ -29,7 +29,7 @@
         <% } else { %>
           <form class="form-inline my-2 my-lg-0" method="POST" action="/logout">
             <!-- '=' means we want to display sth -->
-            <a class="nav-item nav-link disabled" href="#">Logged in as <%= user %></a>
+            <a class="nav-item nav-link disabled" href="#">Logged in as <%= currentUser %></a>
             <button class="btn btn-outline-dark" type="submit">Logout</button>
           </form>
         <% } %>
