@@ -78,7 +78,12 @@ app.post("/urls", (req, res) => {
   const key = generateRandomString();
   // bodyParse {longURL: "what user types in" } <input name="longURL">
   // id is mainly for css styling
-  urlDatabase[key] = { longURL: req.body.longURL, userID: req.session.user, visited: 0};
+  urlDatabase[key] = {
+    longURL: req.body.longURL,
+    userID: req.session.user,
+    visited: 1,
+    visitedUser: [],
+  };
   res.redirect(`/urls`);
 });
 
@@ -109,13 +114,18 @@ app.get("/u/:shortURL", (req, res) => {
 // we can have multiple /:agrs
 app.get("/urls/:shortURL", (req, res) => {
   const urlData = urlDatabase[req.params.shortURL];
+  const currentDate = new Date();
+  const visitInfo = req.session.user + '(' + currentDate.toJSON().slice(0, 10) + ')';
+  urlData.visitedUser.push(visitInfo);
+
   const templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlData.longURL,
-    visited: urlData.visited++
+    visited: urlData.visited++,
+    visitedUser: urlData.visitedUser,
+    user: req.session.user,
+    currentUser: urlData.userID,
   };
-  templateVars.user = req.session.user;
-  templateVars.currentUser = urlData.userID;
 
   res.render("urls_show", templateVars);
 });
@@ -128,7 +138,12 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 app.post("/urls/:shortURL", (req, res) => {
   const key = req.params.shortURL;
-  urlDatabase[key] = { longURL: req.body.longURL, userID: req.session.user, visited: 0};
+  urlDatabase[key] = { 
+    longURL: req.body.longURL,
+    userID: req.session.user,
+    visited: 1,
+    visitedUser: [],
+  };
   res.redirect(`/urls`);
 });
 
@@ -207,7 +222,12 @@ app.put("/urls/:shortURL", (req, res) => {
   console.log('put')
   console.log(req);
   const key = req.params.shortURL;
-  urlDatabase[key] = { longURL: req.body.longURL, userID: req.session.user, visited: 0};
+  urlDatabase[key] = {
+    longURL: req.body.longURL,
+    userID: req.session.user,
+    visited: 1,
+    visitedUser: [],
+  };
   res.redirect(`/urls`);
 });
 
