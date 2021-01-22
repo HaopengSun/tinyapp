@@ -38,7 +38,7 @@ const bcrypt = require('bcrypt');
 app.set("view engine", "ejs");
 
 // import helpers
-const { getUserByEmail } = require('./helper');
+const { getUserByEmail, generateRandomString, addNewUser } = require('./helper');
 
 // middleware--currentUser
 const currentUser = (req, res, next) => {
@@ -68,10 +68,6 @@ app.get("/", (req, res) => {
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
-
-// app.get("/hello", (req, res) => {
-//   res.send("<html><body>Hello <b>World</b></body></html>\n");
-// });
 
 app.get("/hello", (req, res) => {
   const templateVars = { greeting: 'Hello World!' };
@@ -121,10 +117,6 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
-function generateRandomString() {
-  return  Math.random().toString(36).substring(2,8);
-}
-
 // shortURL is the key of the requested object { shortURL:value }
 app.get("/u/:shortURL", (req, res) => {
   if (!urlDatabase[req.params.shortURL]) {
@@ -168,22 +160,34 @@ app.get("/urls/:shortURL", (req, res) => {
 // delete
 app.post("/urls/:shortURL/delete", (req, res) => {
   if (req.session.user) {
-    delete urlDatabase[req.params.shortURL];
-    res.redirect("/urls");
+    if (req.session.user === urlDatabase[req.params.shortURL]['user']) {
+      delete urlDatabase[req.params.shortURL];
+      res.redirect("/urls");
+    } else {
+      res.send('You are not authenticated to delete!');
+    }
   } else {
     res.send('please log in!');
   }
 });
 
 app.post("/urls/:shortURL", (req, res) => {
-  const key = req.params.shortURL;
-  urlDatabase[key] = { 
-    longURL: req.body.longURL,
-    userID: req.session.user,
-    visited: 1,
-    visitedUser: [],
-  };
-  res.redirect(`/urls`);
+  if (req.session.user) {
+    if (req.session.user === urlDatabase[req.params.shortURL]['user']) {
+      const key = req.params.shortURL;
+      urlDatabase[key] = { 
+        longURL: req.body.longURL,
+        userID: req.session.user,
+        visited: 1,
+        visitedUser: [],
+      };
+      res.redirect(`/urls`);
+    } else {
+      res.send('You are not authenticated to create!');
+    }
+  } else {
+    res.send('Please log in!');
+  }
 });
 
 app.get("/login", (req, res) => {
@@ -237,15 +241,10 @@ app.post('/register', (req, res) => {
     res.status(400);
     res.send('invalid email');
   }
-
-  const id = generateRandomString();
-  const hashedPassword = bcrypt.hashSync(passwordInput, 10);
-  users[id] = {id, email: emailInput, password: hashedPassword};
-
-  const templateVars = {};
-  templateVars.user = emailInput;
-
-  req.session.user = emailInput;
+  
+  const email = addNewUser(users, emailInput, passwordInput);
+  const templateVars = { user: email};
+  req.session.user = email;
   res.redirect("/urls");
 });
 
@@ -268,8 +267,6 @@ app.put("/urls/:shortURL", (req, res) => {
   };
   res.redirect(`/urls`);
 });
-
-
 
 // a variable that is created in one request is not accessible in another
 app.get("/set", (req, res) => {
