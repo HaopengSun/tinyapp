@@ -56,7 +56,13 @@ const urlDatabase = {};
 const users = {}
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  const templateVars = {};
+  templateVars.currentUser = req.currentUser;
+  if (templateVars.currentUser) {
+    res.redirect('/urls');
+  } else {
+    res.render('login', templateVars);
+  }
 });
 
 app.get("/urls.json", (req, res) => {
@@ -85,17 +91,21 @@ app.get("/urls", (req, res) => {
 
 // post a new url
 app.post("/urls", (req, res) => {
-  // random string as the key of input URL
-  const key = generateRandomString();
-  // bodyParse {longURL: "what user types in" } <input name="longURL">
-  // id is mainly for css styling
-  urlDatabase[key] = {
-    longURL: req.body.longURL,
-    userID: req.session.user,
-    visited: 1,
-    visitedUser: [],
-  };
-  res.redirect(`/urls`);
+  if (req.session.user) {
+    // random string as the key of input URL
+    const key = generateRandomString();
+    // bodyParse {longURL: "what user types in" } <input name="longURL">
+    // id is mainly for css styling
+    urlDatabase[key] = {
+      longURL: req.body.longURL,
+      userID: req.session.user,
+      visited: 1,
+      visitedUser: [],
+    };
+    res.redirect(`/urls/${key}`);
+  } else {
+    res.send('please log in!');
+  }
 });
 
 // routes order masters and "/urls/new" should be before "/urls/:shortURL"
@@ -106,7 +116,8 @@ app.get("/urls/new", (req, res) => {
   if (templateVars.currentUser) {
     res.render("urls_new", templateVars);
   } else {
-    res.redirect("/urls");
+    const templateVars = { currentUser: null };
+    res.render('login', templateVars);
   }
 });
 
@@ -116,6 +127,9 @@ function generateRandomString() {
 
 // shortURL is the key of the requested object { shortURL:value }
 app.get("/u/:shortURL", (req, res) => {
+  if (!urlDatabase[req.params.shortURL]) {
+    res.send('url is not existed!');
+  }
   const longURL = urlDatabase[req.params.shortURL]["longURL"];
   res.redirect(longURL);
 });
@@ -125,10 +139,17 @@ app.get("/u/:shortURL", (req, res) => {
 // we can have multiple /:agrs
 app.get("/urls/:shortURL", (req, res) => {
   const urlData = urlDatabase[req.params.shortURL];
+
+  if (!urlData) {
+    res.send('url is not existed!');
+  }
+
   const currentDate = new Date();
   if (req.currentUser) {
     const visitInfo = req.currentUser + '(' + currentDate.toJSON().slice(0, 10) + ')';
     urlData.visitedUser.push(visitInfo);
+  } else {
+    res.send('please log in!');
   }
 
   const templateVars = {
@@ -146,8 +167,12 @@ app.get("/urls/:shortURL", (req, res) => {
 
 // delete
 app.post("/urls/:shortURL/delete", (req, res) => {
-  delete urlDatabase[req.params.shortURL];
-  res.redirect("/urls");
+  if (req.session.user) {
+    delete urlDatabase[req.params.shortURL];
+    res.redirect("/urls");
+  } else {
+    res.send('please log in!');
+  }
 });
 
 app.post("/urls/:shortURL", (req, res) => {
